@@ -1,0 +1,31 @@
+{
+    "dataSourceName": "datasource-freshnessvalue",
+    "targetIndexName": "index-freshnessvalue",
+    "skillsetName" : "skillset-freshnessvalue",
+    "fieldMappings": [
+        {
+            "mappingFunction": {
+                "name": "base64Encode",
+                "parameters" : { "useHttpServerUtilityUrlTokenEncode" : false }
+            },
+            "sourceFieldName": "metadata_storage_path",
+            "targetFieldName": "id"
+        }
+    ],
+    "outputFieldMappings" : 
+    [
+          {
+              "sourceFieldName": "/document/freshness",
+              "targetFieldName": "freshness"
+          }     
+    ],
+    "parameters": {
+        "batchSize": 100,
+        "configuration": {
+            "dataToExtract": "contentAndMetadata",
+            "parsingMode": "json"
+        },
+        "maxFailedItems": -1,
+        "maxFailedItemsPerBatch": -1
+    }
+}

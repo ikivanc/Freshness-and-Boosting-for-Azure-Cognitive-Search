@@ -1,0 +1,139 @@
+{
+        "fields": [
+            {
+                "name": "id",
+                "type": "Edm.String",
+                "facetable": false,
+                "filterable": false,
+                "key": true,
+                "retrievable": true,
+                "searchable": false,
+                "sortable": false,
+                "analyzer": null
+            },
+            {
+                "name": "docFrequency",
+                "type": "Edm.String",
+                "facetable": false,
+                "filterable": false,
+                "key": false,
+                "retrievable": true,
+                "searchable": false,
+                "sortable": false
+            },
+            {
+                "name": "author",
+                "type": "Edm.String",
+                "facetable": false,
+                "filterable": false,
+                "key": false,
+                "retrievable": true,
+                "searchable": true,
+                "sortable": false
+            },
+            {
+                "name": "location",
+                "type": "Edm.String",
+                "facetable": false,
+                "filterable": false,
+                "key": false,
+                "retrievable": true,
+                "searchable": true,
+                "sortable": false,
+                "analyzer": "en.microsoft"
+            },
+            {
+                "name": "articleId",
+                "type": "Edm.Int64",
+                "facetable": false,
+                "filterable": true,
+                "retrievable": true,
+                "sortable": false
+            },
+            {
+                "name": "category",
+                "type": "Edm.String",
+                "facetable": false,
+                "filterable": true,
+                "key": false,
+                "retrievable": true,
+                "searchable": false,
+                "sortable": false
+            },
+            {
+                "name": "content",
+                "type": "Edm.String",
+                "facetable": false,
+                "filterable": false,
+                "key": false,
+                "retrievable": true,
+                "searchable": true,
+                "sortable": false,
+                "analyzer": "en.microsoft"
+            },
+            {
+                "name": "published",
+                "type": "Edm.DateTimeOffset",
+                "facetable": false,
+                "filterable": true,
+                "retrievable": true,
+                "sortable": true
+            },
+            {
+                "name": "keyPhrases",
+                "type": "Collection(Edm.String)",
+                "searchable": true,
+                "filterable": true,
+                "facetable": false,
+                "retrievable": true,
+                "sortable": false,
+                "analyzer": "en.microsoft"
+            },
+            {
+                "name": "entities",
+                "type": "Collection(Edm.String)",
+                "searchable": true,
+                "filterable": true,
+                "facetable": false,
+                "retrievable": true,
+                "sortable": false,
+                "analyzer": "en.microsoft"
+            },
+            {
+                "name": "freshness",
+                "type": "Edm.Double",
+                "filterable": true,
+                "facetable": false,
+                "retrievable": true,
+                "sortable": true
+            }
+        ],
+    "scoringProfiles": [
+        {
+          "name": "freshnessValueScore",
+          "functions": [
+            {
+              "fieldName": "freshness",
+              "freshness": null,
+              "interpolation": "linear",
+              "magnitude": {
+                "boostingRangeStart": 0,
+                "boostingRangeEnd": 1,
+                "constantBoostBeyondRange": false
+              },
+              "distance": null,
+              "tag": null,
+              "type": "magnitude",
+              "boost": 5
+            }
+          ],
+          "functionAggregation": "0",
+          "text": {
+            "weights": {
+              "keyPhrases": 3,
+              "entities": 3
+            }
+          }
+        }
+      ]
+}

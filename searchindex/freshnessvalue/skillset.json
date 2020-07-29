@@ -1,0 +1,34 @@
+{
+  "description": "Freshness for documents",
+  "skills":
+  [
+      {
+        "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
+        "description": "Custom skill for custom freshness generator",
+        "uri": "<<Azure Functions Service Name>>",
+        "batchSize":1,
+        "context": "/document",
+        "inputs": [
+          {
+            "name": "published",
+            "source": "/document/published"
+          },
+          {
+            "name": "frequency",
+            "source": "/document/tags"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "freshness",
+            "targetName": "freshness"
+          }
+        ]
+      }
+  ],
+  "cognitiveServices": {
+    "@odata.type": "#Microsoft.Azure.Search.CognitiveServicesByKey",
+      "description": "my-cog-serv",
+      "key": "<<Your Cognitive Services Key>>"
+  }
+}

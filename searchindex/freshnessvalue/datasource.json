@@ -1,0 +1,11 @@
+{
+    "name": "datasource-freshnessvalue",
+    "description": "Data Source Definition for boosting and freshness",
+    "type": "azureblob",
+    "credentials": {
+        "connectionString": "DefaultEndpointsProtocol=https;AccountName=searchboosting;AccountKey=lA15LTN1SQOIm/xD/Cmlpf7ufU4AN8HD7rHJ2D2zyqCkty3aNV8aonUlic18yfxLW9ES486wSGLfJcZ9SbGwxw==;EndpointSuffix=core.windows.net"
+     },
+    "container": {
+        "name": "freshness"
+    }
+}

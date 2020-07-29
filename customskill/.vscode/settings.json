@@ -1,0 +1,7 @@
+{
+    "azureFunctions.deploySubpath": "target/azure-functions/freshnesscustomskill-1596023508043",
+    "azureFunctions.projectLanguage": "Java",
+    "azureFunctions.projectRuntime": "~2",
+    "debug.internalConsoleOptions": "neverOpen",
+    "azureFunctions.preDeployTask": "package"
+}

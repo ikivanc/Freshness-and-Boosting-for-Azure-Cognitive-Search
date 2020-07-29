@@ -1,0 +1,23 @@
+{
+    "dataSourceName": "datasource-multidatefield",
+    "targetIndexName": "index-multidatefield",
+    "fieldMappings": [
+        {
+            "mappingFunction": {
+                "name": "base64Encode",
+                "parameters" : { "useHttpServerUtilityUrlTokenEncode" : false }
+            },
+            "sourceFieldName": "metadata_storage_path",
+            "targetFieldName": "id"
+        }
+    ],
+    "parameters": {
+        "batchSize": 100,
+        "configuration": {
+            "dataToExtract": "contentAndMetadata",
+            "parsingMode": "json"
+        },
+        "maxFailedItems": -1,
+        "maxFailedItemsPerBatch": -1
+    }
+}
