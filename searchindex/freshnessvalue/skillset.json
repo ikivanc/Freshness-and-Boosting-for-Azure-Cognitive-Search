@@ -15,7 +15,7 @@
           },
           {
             "name": "frequency",
-            "source": "/document/tags"
+            "source": "/document/docFrequency"
           }
         ],
         "outputs": [
