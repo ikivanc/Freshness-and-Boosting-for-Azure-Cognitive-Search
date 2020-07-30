@@ -1,23 +1,14 @@
 # Freshness and Boosting for Azure Cognitive Search
 
-Azure Services
+## Overview 
 
-| NAME              | TYPE                 | LOCATION    |
-| ----------------- | -------------------- | ----------- |
-| enrichdocument    | Cognitive Services   | West Europe |
-| freshnessboosting | Application Insights | West Europe |
-| freshnessboosting | Storage account      | West Europe |
-| freshnessboosting | App Service          | West Europe |
-| freshnesstrigger  | Logic app            | West Europe |
-| searchboosting    | Search service       | West Europe |
-| searchboosting    | Storage account      | West Europe |
-| WestEuropePlan    | App Service plan     | West Europe |
-
-## I.          Documents with different publish frequencies
+### Documents with different publish frequencies
 
 Information retrieval systems provide relevant content to users based on their queries. Relevancy in our case the most recent documents with query matches in index base, “recent documents” depends on document types, these document types have different publish frequencies. There are some documents with “Daily”, “Weekly”, “Bi-weekly", “Monthly”, “Yearly” publish frequencies.
 
-We identify these recent documents term as “Freshness”. We are aiming to retrieve freshest content based on document publish frequency. 
+The main difficulty we are trying to solve here is, considering all fresh documents per document types and rank them in an aggregated list. Frequent documents age quickly comparing to less frequent documents, daily documents will not be fresh once there is a new document a day later, however monthly document will be still fresh until next month in 30days. All new documents from different frequency types will be treated in same way. 
+
+We identify recent documents term as “Freshness”. We are aiming to retrieve freshest content based on document publish frequency. 
 
 The main difficulty we are trying to solve here is, considering all fresh documents per document types and rank them in an aggregated list. Frequent documents age quickly comparing to less frequent documents, daily documents will not be fresh once there is a new document a day later, however monthly document will be still fresh until next month in 30days. All new documents from different frequency types will be treated in same way. 
 
@@ -36,6 +27,45 @@ In this case after receiving relevant results, it is hard to order by their date
 Let’s take Day 15 on the graph as a reference for freshness, documents in circles are freshest content in their own document types based on their publish frequencies. 15 days old monthly doc4 document is still freshest, 5 days old bi-weekly doc3 is freshest, 1-day old weekly doc2 is freshest, published on the same day doc1 is freshest in its own frequency category.
 
 ![Figure 1. Document Type Distribution](images/document_type_distribution.png)
+
+We'll cover 2 approaches to handle freshness boosting
+
+1. Adding a freshness value field to rank based on the value
+2. Adding multiple date fields per document type to rank based on built in datetime freshness
+
+## Solution Overview
+
+In this code sample we've created a sample using a public dataset  [BBC News Dataset from a Kaggle Competition](https://www.kaggle.com/c/learn-ai-bbc/data?select=BBC+News+Train.csv) . To simulate a case we've enriched these news in [Sample Data Generation Jupyter Notebook]([https://github.com/ikivanc/Freshness-and-Boosting-for-Azure-Cognitive-Search/blob/master/notebooks/Sample%20Data%20Generation.ipynb](https://github.com/ikivanc/Freshness-and-Boosting-for-Azure-Cognitive-Search/blob/master/notebooks/Sample Data Generation.ipynb)). In this data enrichment we've applied below
+
+* Extracting KeyPhrases using Cognitive Services
+* Extracting Entities using Cognitive Services
+* Generating a Fake Location
+* Generating a Fake Author
+* Generating a Fake Publish Date
+* Generating Document Type
+
+After enriching news with above actions we've created JSON files and uploaded them to Azure Blob Storage to use as a datasource for Azure Cognitive Search Index. Also Azure Cognitive Search Indexer uses a custom skill , Azure Functions with Java. Also to trigger and calculate freshness of the document we've created a Logic Apps to `Reset` indexer and `Run` Indexer.
+
+Folder structure:   
+
+- `customskill`  - Azure Functions with Java to calculate Freshness of documents.
+- `data`
+  - `bbc` 	   - BBC News Dataset   
+- `notebooks`    - Data generation for our scenario 
+- `searchindex` - Azure Search Index Definitions. 
+
+After creating and deploying Azure Service list will be like below
+
+| NAME              | TYPE                 | LOCATION    |
+| ----------------- | -------------------- | ----------- |
+| enrichdocument    | Cognitive Services   | West Europe |
+| freshnessboosting | Application Insights | West Europe |
+| freshnessboosting | Storage account      | West Europe |
+| freshnessboosting | App Service          | West Europe |
+| freshnesstrigger  | Logic app            | West Europe |
+| searchboosting    | Search service       | West Europe |
+| searchboosting    | Storage account      | West Europe |
+| WestEuropePlan    | App Service plan     | West Europe |
 
 # Boosting Techniques
 
@@ -90,8 +120,6 @@ The decaying functions are designed for publication frequency. It gives differen
 
 *Table* *1. Freshness value effect on each day per document frequency*
 
- 
-
 Formula: 
 
 >  Freshness value = 1 - (Day Difference / Document Frequency)
@@ -120,6 +148,60 @@ public double decayingFunction(Date publishDate, int documentFrequency){
 *Graph 1. Representation of freshness value for document frequency*
 
 Freshness value is a double value between 0 to 1 based on publish date and document frequency using the decaying function. The freshness of a document is defined as a custom skill in an Azure Function with Java and triggered by an indexer. 
+
+Azure Function for Azure Cognitive Search Custom Skill input and output interfaces like below 
+
+Input format:
+
+```json
+{
+    "values": [
+      {
+        "recordId": "a1",
+        "data":
+           {
+                  "published": "2020-07-29T07:17:19",
+       			 "frequency": "Monthly"
+           }
+      },
+      {
+        "recordId": "b5",
+        "data":
+           {
+                  "published": "2020-07-11T09:17:21",
+       			 "frequency": "Weekly"
+           }
+      }
+    ]
+}
+```
+
+Output Format:
+
+```json
+{
+  "values": [
+    {
+      "recordId": "0",
+      "data": {
+        "freshness": 0.9666666666666667
+      },
+      "errors": null,
+      "warnings": null
+    },
+    {
+      "recordId": "0",
+      "data": {
+        "freshness": 0.0
+      },
+      "errors": null,
+      "warnings": null
+    }
+  ]
+}
+```
+
+
 
 The Azure Search Indexer is triggered every 24-hour and this trigger re-calculates the freshness value using “document frequency” and “publish date” of a document using decaying function.
 
