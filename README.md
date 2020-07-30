@@ -73,7 +73,7 @@ We will deep dive into using numeric freshness value for boosting and boosting f
 
 In first approach we have provided a double type field called “**freshness**” in our index. This field is calculated by Azure Functions using decaying calculation function. Decaying Function helps us to find a numeric value based on age of the document and document type. After that we are using this double value to boost our documents.
 
-![image-20200730103613172](C:\Users\ikiva\Documents\GitHub\Freshness-and-Boosting-for-Azure-Cognitive-Search\images\magnitude_boosting.png)
+![image-20200730103613172](images/magnitude_boosting.png)
 
 **Decaying Function**
 
@@ -113,10 +113,9 @@ public double decayingFunction(Date publishDate, int documentFrequency){
   } 
 ```
 
-
  After applying formula above value representation in a graph looks like *“Graph 1. Representation of freshness value for document frequency”
 
-![image-20200730094801297](C:\Users\ikiva\AppData\Roaming\Typora\typora-user-images\image-20200730094801297.png)
+![image-20200730124504974](images/freshness_aging.png)
 
 *Graph 1. Representation of freshness value for document frequency*
 
@@ -136,7 +135,7 @@ Figure 1 - Freshness Flow
 
 For the second approach we have extended “published” datetime field for all document types. Based on the document type we have updated related field and set rest of the other fields as default. In Azure Search for default value you must provide a value, in our case we have provided “1900-01-01”. To provide these different fields we have defined 5 new fields in index definition and provided a logic in our data pipeline to generate these 5 new fields.
 
-![image-20200730104238293](C:\Users\ikiva\Documents\GitHub\Freshness-and-Boosting-for-Azure-Cognitive-Search\images\freshness_boosting.png)
+![image-20200730104238293](images/freshness_boosting.png)
 
 *“Table 2. Frequency distribution for multi date fields”* represent how we generate fields
 
