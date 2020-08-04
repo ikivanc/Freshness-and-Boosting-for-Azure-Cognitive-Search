@@ -8,9 +8,10 @@ import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
+
 import com.function.api.request.*;
 import com.function.api.response.*;
-
+import com.function.service.FreshnessService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -20,7 +21,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 
 /**
- * Freshness calculation, Azure Functions with HTTP Trigger.
+ * Freshness calculation running as a HTTP Triggered Azure Function.
  */
 public class Function {
     @FunctionName("FreshnessFunction")
@@ -33,10 +34,9 @@ public class Function {
             final ExecutionContext context) {
         context.getLogger().info("Java HTTP trigger processed a request.");
 
-
         // Get JSON Body as string
         final String jsonBody =  request.getBody().orElse(null);
-        
+
         context.getLogger().info("requestBody: " + jsonBody);
 
         try {
@@ -46,14 +46,13 @@ public class Function {
                                     .serializeNulls()
                                     .create();
 
-            /* Parse JSON Body request to an Object **/
+            // Parse JSON Body request to an Object 
             Values valueObject = gsonParser.fromJson(jsonBody, Values.class);
             List<Value> valueList = valueObject.values; 
             
             if (valueList == null) {
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Please pass the object in the request body").build();
             } else {
-
                 List<ResponseValue> values = new ArrayList<>();
                 ResponseValues respvalues = new ResponseValues();
                 FreshnessService freshnessService = new FreshnessService();
@@ -65,11 +64,9 @@ public class Function {
                     String docFrequency = value.getData().frequency;
                     if (docFrequency!=null) {                      
                         // print variables
-                        context.getLogger().info("recordId: " + value.getRecordId());
-                        context.getLogger().info("published: " + value.getData().published);
-                        context.getLogger().info("frequency: " + docFrequency);
+                        context.getLogger().info(String.format("RecordId: [%s], Published: [%s], Frequency: [%s]", value.getRecordId(), value.getData().published, docFrequency));
 
-                        // Decaying function calcualtion
+                        // Decaying function calculation
                         double freshnessValue = freshnessService.getFreshnessValue(value.getData().published, docFrequency);
 
                         // Set Response JSON values
@@ -94,8 +91,7 @@ public class Function {
             
         } catch (Exception e) {
             // Handle error and return HTTP response
-            context.getLogger().log(Level.ALL, e.getMessage(),jsonBody);
-            context.getLogger().info("An error occured: " + e.getMessage());
+            context.getLogger().log(Level.SEVERE, e.getMessage(), jsonBody);
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body(e).build();
         }
     }

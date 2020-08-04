@@ -1,9 +1,9 @@
-package com.function;
+package com.function.service;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
-import org.joda.time.*;
+import org.joda.time.Days;
+import org.joda.time.DateTime;
 
 /* A class for generating Freshness value */
 public class FreshnessService {
